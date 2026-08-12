@@ -1,4 +1,4 @@
-# Contributing to jcode
+# Contributing to pryx
 
 Thanks for contributing.
 

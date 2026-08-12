@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Populate the platform npm packages from jcode release tarballs.
+# Populate the platform npm packages from pryx release tarballs.
 set -euo pipefail
 
 if [ "$#" -ne 1 ]; then
@@ -20,9 +20,9 @@ prepare() {
   chmod +x "$package_dir/bin/$installed_binary"
 }
 
-prepare linux-x64 jcode-linux-x86_64.tar.gz jcode-linux-x86_64 jcode
-prepare linux-arm64 jcode-linux-aarch64.tar.gz jcode-linux-aarch64 jcode
-prepare darwin-x64 jcode-macos-x86_64.tar.gz jcode-macos-x86_64 jcode
-prepare darwin-arm64 jcode-macos-aarch64.tar.gz jcode-macos-aarch64 jcode
-prepare win32-x64 jcode-windows-x86_64.tar.gz jcode-windows-x86_64.exe jcode.exe
-prepare win32-arm64 jcode-windows-aarch64.tar.gz jcode-windows-aarch64.exe jcode.exe
+prepare linux-x64 pryx-linux-x86_64.tar.gz pryx-linux-x86_64 pryx
+prepare linux-arm64 pryx-linux-aarch64.tar.gz pryx-linux-aarch64 pryx
+prepare darwin-x64 pryx-macos-x86_64.tar.gz pryx-macos-x86_64 pryx
+prepare darwin-arm64 pryx-macos-aarch64.tar.gz pryx-macos-aarch64 pryx
+prepare win32-x64 pryx-windows-x86_64.tar.gz pryx-windows-x86_64.exe pryx.exe
+prepare win32-arm64 pryx-windows-aarch64.tar.gz pryx-windows-aarch64.exe pryx.exe

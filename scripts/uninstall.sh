@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Uninstall jcode binaries and (optionally) all user data.
+# Uninstall pryx binaries and (optionally) all user data.
 #
 # Default: removes installed binaries, build channels, and the launcher
 # symlink, but keeps user data (config, auth, sessions, logs) so a clean
 # reinstall picks up where you left off.
 #
 # Flags:
-#   --purge     Also delete ~/.jcode (config, auth, sessions, logs, memory).
+#   --purge     Also delete ~/.pryx (config, auth, sessions, logs, memory).
 #   --dry-run   Print what would be removed without deleting anything.
 #   --yes       Skip the confirmation prompt.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/1jehuang/jcode/master/scripts/uninstall.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/pryx-co/pryx/master/scripts/uninstall.sh | bash
 #   bash scripts/uninstall.sh --purge
 set -euo pipefail
 
@@ -39,18 +39,18 @@ done
 OS="$(uname -s)"
 case "$OS" in
   MINGW*|MSYS*|CYGWIN*)
-    JCODE_HOME="${LOCALAPPDATA:?LOCALAPPDATA not set}/jcode"
-    LAUNCHER_DIR="${JCODE_INSTALL_DIR:-$LOCALAPPDATA/jcode/bin}"
-    LAUNCHER="$LAUNCHER_DIR/jcode.exe"
-    BUILDS_DIR="$JCODE_HOME/builds"
-    USER_DATA_DIR="$JCODE_HOME"
+    PRYX_HOME="${LOCALAPPDATA:?LOCALAPPDATA not set}/pryx"
+    LAUNCHER_DIR="${PRYX_INSTALL_DIR:-$LOCALAPPDATA/pryx/bin}"
+    LAUNCHER="$LAUNCHER_DIR/pryx.exe"
+    BUILDS_DIR="$PRYX_HOME/builds"
+    USER_DATA_DIR="$PRYX_HOME"
     ;;
   *)
-    JCODE_HOME="$HOME/.jcode"
-    LAUNCHER_DIR="${JCODE_INSTALL_DIR:-$HOME/.local/bin}"
-    LAUNCHER="$LAUNCHER_DIR/jcode"
-    BUILDS_DIR="$JCODE_HOME/builds"
-    USER_DATA_DIR="$JCODE_HOME"
+    PRYX_HOME="$HOME/.pryx"
+    LAUNCHER_DIR="${PRYX_INSTALL_DIR:-$HOME/.local/bin}"
+    LAUNCHER="$LAUNCHER_DIR/pryx"
+    BUILDS_DIR="$PRYX_HOME/builds"
+    USER_DATA_DIR="$PRYX_HOME"
     ;;
 esac
 
@@ -59,8 +59,8 @@ TARGETS=()
 [ -e "$LAUNCHER" ] || [ -L "$LAUNCHER" ] && TARGETS+=("$LAUNCHER (launcher)")
 [ -d "$BUILDS_DIR" ] && TARGETS+=("$BUILDS_DIR (installed binaries: stable/current/canary/versions)")
 if [ "$OS" = "Darwin" ]; then
-  [ -d "$HOME/Applications/Jcode.app" ] && TARGETS+=("$HOME/Applications/Jcode.app (macOS launcher)")
-  [ -d "$HOME/Applications/Jcode Notifications.app" ] && TARGETS+=("$HOME/Applications/Jcode Notifications.app (notification broker)")
+  [ -d "$HOME/Applications/Pryx.app" ] && TARGETS+=("$HOME/Applications/Pryx.app (macOS launcher)")
+  [ -d "$HOME/Applications/Pryx Notifications.app" ] && TARGETS+=("$HOME/Applications/Pryx Notifications.app (notification broker)")
 fi
 if [ "$PURGE" = true ] && [ -d "$USER_DATA_DIR" ]; then
   TARGETS+=("$USER_DATA_DIR (ALL user data: config, auth, sessions, logs, memory)")
@@ -68,12 +68,12 @@ fi
 
 # Compatibility wrapper installed by some setups.
 SELFDEV_WRAPPER="$HOME/.local/bin/selfdev"
-if [ -f "$SELFDEV_WRAPPER" ] && grep -q "jcode" "$SELFDEV_WRAPPER" 2>/dev/null; then
+if [ -f "$SELFDEV_WRAPPER" ] && grep -q "pryx" "$SELFDEV_WRAPPER" 2>/dev/null; then
   TARGETS+=("$SELFDEV_WRAPPER (selfdev wrapper)")
 fi
 
 if [ ${#TARGETS[@]} -eq 0 ]; then
-  info "Nothing to uninstall: no jcode installation found."
+  info "Nothing to uninstall: no pryx installation found."
   exit 0
 fi
 
@@ -105,9 +105,9 @@ if [ "$ASSUME_YES" = false ]; then
   fi
 fi
 
-# Stop any running jcode server so files are not recreated mid-wipe.
+# Stop any running pryx server so files are not recreated mid-wipe.
 if command -v pkill >/dev/null 2>&1; then
-  pkill -f 'jcode( .*)? serve' 2>/dev/null || true
+  pkill -f 'pryx( .*)? serve' 2>/dev/null || true
 fi
 
 remove() {
@@ -120,15 +120,15 @@ remove() {
 
 remove "$LAUNCHER"
 if [ "$OS" = "Darwin" ]; then
-  remove "$HOME/Applications/Jcode.app"
-  remove "$HOME/Applications/Jcode Notifications.app"
+  remove "$HOME/Applications/Pryx.app"
+  remove "$HOME/Applications/Pryx Notifications.app"
 fi
 if [ "$PURGE" = true ]; then
   remove "$USER_DATA_DIR"
 else
   remove "$BUILDS_DIR"
 fi
-if [ -f "$SELFDEV_WRAPPER" ] && grep -q "jcode" "$SELFDEV_WRAPPER" 2>/dev/null; then
+if [ -f "$SELFDEV_WRAPPER" ] && grep -q "pryx" "$SELFDEV_WRAPPER" 2>/dev/null; then
   remove "$SELFDEV_WRAPPER"
 fi
 
@@ -154,8 +154,8 @@ case "$OS" in
       unset IFS
       set +f
       if [ "$new_user_path" != "$current_user_path" ]; then
-        if JCODE_NEW_USER_PATH="$new_user_path" powershell.exe -NoProfile -NonInteractive -Command \
-          '[Environment]::SetEnvironmentVariable("Path", $env:JCODE_NEW_USER_PATH, "User")' >/dev/null 2>&1; then
+        if PRYX_NEW_USER_PATH="$new_user_path" powershell.exe -NoProfile -NonInteractive -Command \
+          '[Environment]::SetEnvironmentVariable("Path", $env:PRYX_NEW_USER_PATH, "User")' >/dev/null 2>&1; then
           info "Removed $win_launcher_dir from your user PATH."
         fi
       fi
@@ -163,9 +163,9 @@ case "$OS" in
     ;;
 esac
 
-info "jcode uninstalled."
+info "pryx uninstalled."
 if [ "$PURGE" = false ]; then
-  info "Reinstall with: curl -fsSL https://jcode.sh/install | bash"
+  info "Reinstall with: curl -fsSL https://pryx.sh/install | bash"
 else
-  info "All jcode data wiped. Reinstall with: curl -fsSL https://jcode.sh/install | bash"
+  info "All pryx data wiped. Reinstall with: curl -fsSL https://pryx.sh/install | bash"
 fi

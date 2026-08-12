@@ -1,0 +1,13 @@
+[package]
+name = "pryx-tui-messages"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+pryx-config-types = { path = "../pryx-config-types" }
+pryx-message-types = { path = "../pryx-message-types" }
+pryx-session-types = { path = "../pryx-session-types" }
+pryx-tui-markdown = { path = "../pryx-tui-markdown" }
+ratatui = "0.30"
+serde_json = "1"

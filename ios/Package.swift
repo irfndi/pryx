@@ -2,22 +2,22 @@
 import PackageDescription
 
 let package = Package(
-    name: "JCodeKit",
+    name: "PryxKit",
     platforms: [
         .iOS(.v17),
         .macOS(.v14),
     ],
     products: [
-        .library(name: "JCodeKit", targets: ["JCodeKit"])
+        .library(name: "PryxKit", targets: ["PryxKit"])
     ],
     targets: [
         .target(
-            name: "JCodeKit",
+            name: "PryxKit",
             swiftSettings: [.enableUpcomingFeature("StrictConcurrency")]
         ),
         .testTarget(
-            name: "JCodeKitTests",
-            dependencies: ["JCodeKit"]
+            name: "PryxKitTests",
+            dependencies: ["PryxKit"]
         ),
     ]
 )

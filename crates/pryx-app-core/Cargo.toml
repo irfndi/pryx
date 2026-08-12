@@ -1,0 +1,145 @@
+[package]
+name = "pryx-app-core"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+# Application core for pryx: all non-presentation modules (server, agent,
+# provider, auth, session, tool, config, etc.) extracted out of the monolithic
+# root `pryx` crate so they compile as a separate rustc unit. The root `pryx`
+# crate (cli + tui + bin) re-exports this crate's modules via `pub use
+# pryx_app_core::*`, preserving every existing `crate::<module>` path.
+
+[lib]
+name = "pryx_app_core"
+path = "src/lib.rs"
+
+[dependencies]
+# NOTE: the jemalloc allocator stats live in `pryx-base` (process_memory) and
+# local embeddings live in `pryx-base` (embedding); this crate forwards those
+# features to pryx-base rather than depending on the backing crates directly.
+
+# Async runtime
+tokio = { version = "1", features = ["fs", "io-std", "io-util", "macros", "net", "process", "rt-multi-thread", "signal", "sync", "time"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+futures = "0.3"
+async-trait = "0.1"
+
+# HTTP client
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "blocking", "charset", "http2", "system-proxy", "rustls-tls", "rustls-tls-native-roots"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["raw_value"] }
+
+# CLI
+
+# File operations
+glob = "0.3"
+similar = "2"            # diffing for edits
+
+# Utilities
+dirs = "5"               # home directory
+anyhow = "1"
+libc = "0.2"             # Unix system calls (flock)
+chrono = { version = "0.4", features = ["serde"] }
+regex = "1"
+urlencoding = "2"        # URL encoding for web search
+uuid = { version = "1", features = ["v4", "v5"] }
+
+# Embeddings (local inference) live in pryx-base; this crate forwards the
+# `embeddings` feature to pryx-base rather than depending on pryx-embedding.
+pryx-import-core = { path = "../pryx-import-core" }
+
+# OAuth
+base64 = "0.22"
+sha2 = "0.10"
+rand = "0.9.3"
+url = "2"
+open = "5"               # Open URLs in browser
+pryx-agent-runtime = { path = "../pryx-agent-runtime" }
+pryx-ambient-types = { path = "../pryx-ambient-types" }
+pryx-notify-email = { path = "../pryx-notify-email" }
+pryx-provider-core = { path = "../pryx-provider-core" }
+pryx-schema-dialect = { path = "../pryx-schema-dialect" }
+# NOTE: pryx-app-core does NOT depend on any pryx-tui-* crate. They were
+# unused dead dependency edges here (the TUI declares them itself). Removing
+# them stops a pryx-tui-* edit from cascading a recompile through app-core.
+pryx-update-core = { path = "../pryx-update-core" }
+pryx-terminal-image = { path = "../pryx-terminal-image" }
+
+# Streaming
+tokio-stream = "0.1"
+
+# TUI
+ratatui = "0.30"
+crossterm = { version = "0.29", features = ["event-stream"] }
+
+# Markdown & syntax highlighting
+unicode-width = "0.2"   # Unicode character display width
+
+# PDF parsing (behind feature flag)
+pryx-pdf = { path = "../pryx-pdf", optional = true }
+pryx-build-support = { path = "../pryx-build-support" }
+pryx-build-meta = { path = "../pryx-build-meta" }
+
+# Foundational layer (provider, auth, config, session, message, memory, ...).
+# Re-exported via `pub use pryx_base::*` in lib.rs. default-features=false so
+# this crate controls pryx-base's optional features (see [features] below).
+pryx-base = { path = "../pryx-base", default-features = false }
+pryx-command-risk = { path = "../pryx-command-risk" }
+pryx-core = { path = "../pryx-core" }
+pryx-message-types = { path = "../pryx-message-types" }
+pryx-overnight-core = { path = "../pryx-overnight-core" }
+pryx-plan = { path = "../pryx-plan" }
+pryx-swarm-core = { path = "../pryx-swarm-core" }
+pryx-selfdev-types = { path = "../pryx-selfdev-types" }
+pryx-session-types = { path = "../pryx-session-types" }
+pryx-setup-hints = { path = "../pryx-setup-hints" }
+pryx-task-types = { path = "../pryx-task-types" }
+pryx-tool-core = { path = "../pryx-tool-core" }
+pryx-tool-types = { path = "../pryx-tool-types" }
+
+# Archive extraction (for auto-update)
+flate2 = "1"
+tar = "0.4"
+tempfile = "3"
+agentgrep = { git = "https://github.com/1jehuang/agentgrep.git", tag = "v0.1.6" }
+
+[features]
+default = ["pdf", "embeddings", "bedrock"]
+# jemalloc allocator stats live in pryx-base (process_memory); forward there.
+jemalloc = ["pryx-base/jemalloc"]
+jemalloc-prof = ["pryx-base/jemalloc-prof"]
+# local embeddings live in pryx-base (embedding); forward there.
+embeddings = ["pryx-base/embeddings"]
+# live AWS Bedrock support lives in pryx-base (provider/bedrock); forward there.
+bedrock = ["pryx-base/bedrock"]
+# Used only by the CentOS 7 portable Linux release build.
+linux-compat-vendored-openssl = ["pryx-notify-email/linux-compat-vendored-openssl"]
+# PDF text extraction lives in this crate (tool/read.rs).
+pdf = ["dep:pryx-pdf"]
+# Compiles this crate's test-only helpers/accessors (e.g. the
+# ExternalAuthReviewCandidate read accessors) as `pub` and forwards
+# pryx-base's `test-support` so downstream crates' test targets can reach the
+# whole stack's helpers. Never enabled in normal (non-test) builds.
+test-support = ["pryx-base/test-support"]
+
+[dev-dependencies]
+# Used by async streaming tests (ambient/runner_tests, server/client_actions_tests).
+async-stream = "0.3"
+# Enables pryx-base's test-support helpers (storage::lock_test_env,
+# auth::test_sandbox, bus::reset_models_updated_publish_state_for_tests) for
+# *this* crate's own test target. Feature unification applies this only to
+# test/bench/example builds, not to a normal `cargo build`.
+pryx-base = { path = "../pryx-base", default-features = false, features = ["test-support"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+global-hotkey = "0.7"
+# Native desktop control for the `macos_computer_use` tool (synthetic mouse/keyboard
+# events, cursor positioning, display bounds). `highsierra` enables the
+# CGEventCreateScrollWheelEvent2 binding used for scroll.
+core-graphics = { version = "0.23", features = ["highsierra"] }

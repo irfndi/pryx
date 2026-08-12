@@ -1,9 +1,9 @@
 /**
- * TypeScript SDK for the jcode harness API.
+ * TypeScript SDK for the pryx harness API.
  *
  * ```ts
- * import { JcodeClient } from "@1jehuang/jcode-sdk";
- * const client = await JcodeClient.connect({ clientName: "my-app/1.0" });
+ * import { PryxClient } from "@1jehuang/pryx-sdk";
+ * const client = await PryxClient.connect({ clientName: "my-app/1.0" });
  * const session = await client.createSession(process.cwd());
  * const turn = await client.run(session.session_id, "hello");
  * console.log(turn.text);
@@ -18,12 +18,12 @@ export { HarnessError } from "./errors.js";
 export {
   launchInstance,
   inheritCredentials,
-  userJcodeHome,
+  userPryxHome,
   userAppConfigDir,
 } from "./launch.js";
 export type { LaunchOptions, LaunchedInstance } from "./launch.js";
-export { bundledJcodeBinary, platformBinaryPackage } from "./binary.js";
-export { JcodeClient, unixSocketTransport } from "./client.js";
+export { bundledPryxBinary, platformBinaryPackage } from "./binary.js";
+export { PryxClient, unixSocketTransport } from "./client.js";
 export type {
   ConnectOptions,
   FileContent,

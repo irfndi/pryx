@@ -1,0 +1,21 @@
+[package]
+name = "pryx-protocol"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+pryx-batch-types = { path = "../pryx-batch-types" }
+pryx-config-types = { path = "../pryx-config-types" }
+pryx-message-types = { path = "../pryx-message-types" }
+pryx-plan = { path = "../pryx-plan" }
+pryx-provider-core = { path = "../pryx-provider-core" }
+pryx-selfdev-types = { path = "../pryx-selfdev-types" }
+pryx-session-types = { path = "../pryx-session-types" }
+pryx-side-panel-types = { path = "../pryx-side-panel-types" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+anyhow = "1"
+rand = "0.9"

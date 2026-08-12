@@ -10,35 +10,35 @@ use crate::process_title::{compact_process_title, session_name, set_title};
 
 pub(crate) fn initial_title(args: &Args) -> String {
     match &args.command {
-        Some(Command::Serve { .. }) => "jcode:server".to_string(),
-        Some(Command::Acp) => "jcode acp".to_string(),
-        Some(Command::Server { .. }) => "jcode server".to_string(),
-        Some(Command::Connect) => "jcode:client".to_string(),
+        Some(Command::Serve { .. }) => "pryx:server".to_string(),
+        Some(Command::Acp) => "pryx acp".to_string(),
+        Some(Command::Server { .. }) => "pryx server".to_string(),
+        Some(Command::Connect) => "pryx:client".to_string(),
         #[cfg(unix)]
-        Some(Command::ApiBridge { .. }) => "jcode api-bridge".to_string(),
-        Some(Command::Run { .. }) => "jcode run".to_string(),
-        Some(Command::Login { .. }) => "jcode login".to_string(),
-        Some(Command::Account { .. }) => "jcode account".to_string(),
-        Some(Command::Repl) => "jcode repl".to_string(),
-        Some(Command::Update) => "jcode update".to_string(),
-        Some(Command::Version { .. }) => "jcode version".to_string(),
-        Some(Command::Usage { .. }) => "jcode usage".to_string(),
-        Some(Command::Telemetry(_)) => "jcode telemetry".to_string(),
-        Some(Command::SelfDev { .. }) => "jcode:selfdev".to_string(),
-        Some(Command::Debug { .. }) => "jcode debug".to_string(),
-        Some(Command::Auth(_)) => "jcode auth".to_string(),
-        Some(Command::Provider(_)) => "jcode provider".to_string(),
-        Some(Command::Memory(_)) => "jcode memory".to_string(),
-        Some(Command::Session(_)) => "jcode session".to_string(),
+        Some(Command::ApiBridge { .. }) => "pryx api-bridge".to_string(),
+        Some(Command::Run { .. }) => "pryx run".to_string(),
+        Some(Command::Login { .. }) => "pryx login".to_string(),
+        Some(Command::Account { .. }) => "pryx account".to_string(),
+        Some(Command::Repl) => "pryx repl".to_string(),
+        Some(Command::Update) => "pryx update".to_string(),
+        Some(Command::Version { .. }) => "pryx version".to_string(),
+        Some(Command::Usage { .. }) => "pryx usage".to_string(),
+        Some(Command::Telemetry(_)) => "pryx telemetry".to_string(),
+        Some(Command::SelfDev { .. }) => "pryx:selfdev".to_string(),
+        Some(Command::Debug { .. }) => "pryx debug".to_string(),
+        Some(Command::Auth(_)) => "pryx auth".to_string(),
+        Some(Command::Provider(_)) => "pryx provider".to_string(),
+        Some(Command::Memory(_)) => "pryx memory".to_string(),
+        Some(Command::Session(_)) => "pryx session".to_string(),
         Some(Command::Ambient(subcommand)) => match subcommand {
-            AmbientCommand::RunVisible => "jcode ambient visible".to_string(),
-            _ => "jcode ambient".to_string(),
+            AmbientCommand::RunVisible => "pryx ambient visible".to_string(),
+            _ => "pryx ambient".to_string(),
         },
-        Some(Command::Cloud(_)) => "jcode cloud".to_string(),
-        Some(Command::Pair { .. }) => "jcode pair".to_string(),
-        Some(Command::Permissions) => "jcode permissions".to_string(),
-        Some(Command::Transcript { .. }) => "jcode transcript".to_string(),
-        Some(Command::Dictate { .. }) => "jcode dictate".to_string(),
+        Some(Command::Cloud(_)) => "pryx cloud".to_string(),
+        Some(Command::Pair { .. }) => "pryx pair".to_string(),
+        Some(Command::Permissions) => "pryx permissions".to_string(),
+        Some(Command::Transcript { .. }) => "pryx transcript".to_string(),
+        Some(Command::Dictate { .. }) => "pryx dictate".to_string(),
         Some(Command::SetupHotkey {
             listen_macos_hotkey,
             notify_cli_launch,
@@ -46,36 +46,36 @@ pub(crate) fn initial_title(args: &Args) -> String {
             uninstall,
         }) => {
             if *listen_macos_hotkey || *listen_windows_hotkey {
-                "jcode hotkey listener".to_string()
+                "pryx hotkey listener".to_string()
             } else if notify_cli_launch.is_some() {
-                "jcode shortcut reminder".to_string()
+                "pryx shortcut reminder".to_string()
             } else if *uninstall {
-                "jcode hotkey uninstall".to_string()
+                "pryx hotkey uninstall".to_string()
             } else {
-                "jcode hotkey setup".to_string()
+                "pryx hotkey setup".to_string()
             }
         }
-        Some(Command::Browser { .. }) => "jcode browser".to_string(),
-        Some(Command::Replay { .. }) => "jcode replay".to_string(),
-        Some(Command::Model(_)) => "jcode model".to_string(),
-        Some(Command::ProviderTestCoverage { .. }) => "jcode provider-test-coverage".to_string(),
-        Some(Command::ProviderDoctor { .. }) => "jcode provider-doctor".to_string(),
-        Some(Command::AuthTest { .. }) => "jcode auth-test".to_string(),
-        Some(Command::Restart { .. }) => "jcode restart".to_string(),
-        Some(Command::Menubar { .. }) => "jcode menubar".to_string(),
-        Some(Command::SetupLauncher) => "jcode setup-launcher".to_string(),
+        Some(Command::Browser { .. }) => "pryx browser".to_string(),
+        Some(Command::Replay { .. }) => "pryx replay".to_string(),
+        Some(Command::Model(_)) => "pryx model".to_string(),
+        Some(Command::ProviderTestCoverage { .. }) => "pryx provider-test-coverage".to_string(),
+        Some(Command::ProviderDoctor { .. }) => "pryx provider-doctor".to_string(),
+        Some(Command::AuthTest { .. }) => "pryx auth-test".to_string(),
+        Some(Command::Restart { .. }) => "pryx restart".to_string(),
+        Some(Command::Menubar { .. }) => "pryx menubar".to_string(),
+        Some(Command::SetupLauncher) => "pryx setup-launcher".to_string(),
         None => {
             if let Some(resume) = args.resume.as_deref().filter(|resume| !resume.is_empty()) {
                 let prefix = if crate::cli::selfdev::client_selfdev_requested() {
-                    "jcode:d:"
+                    "pryx:d:"
                 } else {
-                    "jcode:c:"
+                    "pryx:c:"
                 };
                 compact_process_title(prefix, Some(&session_name(resume)))
             } else if crate::cli::selfdev::client_selfdev_requested() {
-                "jcode:selfdev".to_string()
+                "pryx:selfdev".to_string()
             } else {
-                "jcode:client".to_string()
+                "pryx:client".to_string()
             }
         }
     }
@@ -91,7 +91,7 @@ mod tests {
     use crate::storage::lock_test_env;
     use clap::Parser;
 
-    const SELFDEV_ENV: &str = jcode_selfdev_types::CLIENT_SELFDEV_ENV;
+    const SELFDEV_ENV: &str = pryx_selfdev_types::CLIENT_SELFDEV_ENV;
 
     fn with_selfdev_env_removed<T>(f: impl FnOnce() -> T) -> T {
         let _guard = lock_test_env();
@@ -107,36 +107,36 @@ mod tests {
     #[test]
     fn initial_title_labels_server() {
         with_selfdev_env_removed(|| {
-            let args = Args::parse_from(["jcode", "serve"]);
-            assert_eq!(initial_title(&args), "jcode:server");
+            let args = Args::parse_from(["pryx", "serve"]);
+            assert_eq!(initial_title(&args), "pryx:server");
         });
     }
 
     #[test]
     fn initial_title_labels_resume_client_with_short_name() {
         with_selfdev_env_removed(|| {
-            let args = Args::parse_from(["jcode", "--resume", "session_fox_123"]);
-            assert_eq!(initial_title(&args), "jcode:c:fox");
+            let args = Args::parse_from(["pryx", "--resume", "session_fox_123"]);
+            assert_eq!(initial_title(&args), "pryx:c:fox");
         });
     }
 
     #[test]
     fn initial_title_labels_selfdev_command() {
         with_selfdev_env_removed(|| {
-            let args = Args::parse_from(["jcode", "self-dev"]);
-            assert_eq!(initial_title(&args), "jcode:selfdev");
+            let args = Args::parse_from(["pryx", "self-dev"]);
+            assert_eq!(initial_title(&args), "pryx:selfdev");
         });
     }
 
     #[test]
     fn initial_title_labels_windows_hotkey_listener() {
-        let args = Args::parse_from(["jcode", "setup-hotkey", "--listen-windows-hotkey"]);
-        assert_eq!(initial_title(&args), "jcode hotkey listener");
+        let args = Args::parse_from(["pryx", "setup-hotkey", "--listen-windows-hotkey"]);
+        assert_eq!(initial_title(&args), "pryx hotkey listener");
     }
 
     #[test]
     fn initial_title_labels_hotkey_uninstall() {
-        let args = Args::parse_from(["jcode", "setup-hotkey", "--uninstall"]);
-        assert_eq!(initial_title(&args), "jcode hotkey uninstall");
+        let args = Args::parse_from(["pryx", "setup-hotkey", "--uninstall"]);
+        assert_eq!(initial_title(&args), "pryx hotkey uninstall");
     }
 }

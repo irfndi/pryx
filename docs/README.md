@@ -1,6 +1,6 @@
-# jcode Docs
+# pryx Docs
 
-Reference documentation for the jcode codebase.
+Reference documentation for the pryx codebase.
 
 ## Layout
 

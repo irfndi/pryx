@@ -1,0 +1,27 @@
+[package]
+name = "pryx-telemetry-core"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+name = "pryx_telemetry_core"
+path = "src/lib.rs"
+
+[dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+pryx-build-meta = { path = "../pryx-build-meta" }
+pryx-core = { path = "../pryx-core" }
+pryx-logging = { path = "../pryx-logging" }
+pryx-provider-core = { path = "../pryx-provider-core" }
+pryx-selfdev-types = { path = "../pryx-selfdev-types" }
+pryx-storage = { path = "../pryx-storage" }
+pryx-usage-types = { path = "../pryx-usage-types" }
+reqwest = { version = "0.12", default-features = false, features = ["json", "blocking", "charset", "http2", "system-proxy", "rustls-tls", "rustls-tls-native-roots"] }
+serde_json = "1"
+walkdir = "2"
+tokio = { version = "1", features = ["rt"] }
+uuid = { version = "1", features = ["v4"] }
+
+[dev-dependencies]
+tempfile = "3"

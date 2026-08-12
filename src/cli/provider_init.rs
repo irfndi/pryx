@@ -23,7 +23,7 @@ use crate::external_auth::{
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
 pub enum ProviderChoice {
-    Jcode,
+    Pryx,
     Claude,
     #[value(alias = "claude-api", alias = "anthropic-key", alias = "claude-key")]
     AnthropicApi,
@@ -141,7 +141,7 @@ impl ProviderChoice {
     #[allow(deprecated)]
     pub fn as_arg_value(&self) -> &'static str {
         match self {
-            Self::Jcode => "jcode",
+            Self::Pryx => "pryx",
             Self::Claude => "claude",
             Self::AnthropicApi => "anthropic-api",
             Self::ClaudeSubprocess => "claude-subprocess",
@@ -199,8 +199,8 @@ impl ProviderChoice {
 #[allow(deprecated)]
 const PROVIDER_CHOICE_LOGIN_PROVIDERS: &[(ProviderChoice, LoginProviderDescriptor)] = &[
     (
-        ProviderChoice::Jcode,
-        crate::provider_catalog::JCODE_LOGIN_PROVIDER,
+        ProviderChoice::Pryx,
+        crate::provider_catalog::PRYX_LOGIN_PROVIDER,
     ),
     (
         ProviderChoice::Claude,
@@ -434,7 +434,7 @@ pub fn prompt_login_provider_selection(
     heading: &str,
 ) -> Result<LoginProviderDescriptor> {
     prompt_login_provider_selection_optional(providers, heading)?.ok_or_else(|| {
-        anyhow::anyhow!("Login skipped. Run `jcode login` when you're ready to authenticate.")
+        anyhow::anyhow!("Login skipped. Run `pryx login` when you're ready to authenticate.")
     })
 }
 
@@ -645,10 +645,10 @@ async fn detect_auto_provider_flags() -> AutoProviderAvailability {
     // An exec-based daemon reload inherits this one-shot, non-secret snapshot
     // from its predecessor. Consuming it avoids repeating credential discovery
     // on the reload critical path while ensuring later processes cannot reuse it.
-    let auth_status = std::env::var("JCODE_RELOAD_AUTH_STATUS")
+    let auth_status = std::env::var("PRYX_RELOAD_AUTH_STATUS")
         .ok()
         .and_then(|snapshot| {
-            crate::env::remove_var("JCODE_RELOAD_AUTH_STATUS");
+            crate::env::remove_var("PRYX_RELOAD_AUTH_STATUS");
             serde_json::from_str::<auth::AuthStatus>(&snapshot).ok()
         })
         .unwrap_or_else(auth::AuthStatus::check_fast);
@@ -680,7 +680,7 @@ fn provider_label_for_api_key_env(env_key: &str) -> String {
 
 fn provider_login_hint_for_api_key_env(env_key: &str) -> String {
     if env_key == "OPENROUTER_API_KEY" {
-        return "jcode login --provider openrouter".to_string();
+        return "pryx login --provider openrouter".to_string();
     }
 
     crate::provider_catalog::openai_compatible_profiles()
@@ -688,9 +688,9 @@ fn provider_login_hint_for_api_key_env(env_key: &str) -> String {
         .find_map(|profile| {
             let resolved = resolve_openai_compatible_profile(*profile);
             (resolved.api_key_env == env_key)
-                .then(|| format!("jcode login --provider {}", resolved.id))
+                .then(|| format!("pryx login --provider {}", resolved.id))
         })
-        .unwrap_or_else(|| "jcode login".to_string())
+        .unwrap_or_else(|| "pryx login".to_string())
 }
 
 fn ensure_external_api_key_auth_allowed_for_explicit_choice(env_key: &str) -> Result<()> {
@@ -716,7 +716,7 @@ fn ensure_external_api_key_auth_allowed_for_explicit_choice(env_key: &str) -> Re
         return Ok(());
     }
     anyhow::bail!(
-        "Skipped trusting external {} credentials. Run `{}` to authenticate jcode directly.",
+        "Skipped trusting external {} credentials. Run `{}` to authenticate pryx directly.",
         provider_name,
         login_hint
     )
@@ -841,7 +841,7 @@ fn ensure_openai_auth_allowed_for_explicit_choice() -> Result<()> {
     if maybe_prompt_for_generic_oauth_source(
         "OpenAI/Codex",
         auth::external::preferred_unconsented_openai_oauth_source(),
-        "jcode login --provider openai",
+        "pryx login --provider openai",
         false,
         || auth::codex::load_credentials().is_ok(),
     )? {
@@ -859,7 +859,7 @@ fn ensure_openai_auth_allowed_for_explicit_choice() -> Result<()> {
             "OpenAI/Codex",
             "Codex",
             &path,
-            "jcode login --provider openai"
+            "pryx login --provider openai"
         ));
     }
 
@@ -869,7 +869,7 @@ fn ensure_openai_auth_allowed_for_explicit_choice() -> Result<()> {
     }
 
     anyhow::bail!(
-        "Skipped trusting existing ~/.codex/auth.json credentials. Run `jcode login --provider openai` to authenticate jcode directly."
+        "Skipped trusting existing ~/.codex/auth.json credentials. Run `pryx login --provider openai` to authenticate pryx directly."
     )
 }
 
@@ -885,7 +885,7 @@ fn maybe_enable_legacy_codex_auth_for_auto(has_other_provider: bool) -> Result<b
         return maybe_prompt_for_generic_oauth_source(
             "OpenAI/Codex",
             Some(source),
-            "jcode login --provider openai",
+            "pryx login --provider openai",
             true,
             || auth::codex::load_credentials().is_ok(),
         );
@@ -906,7 +906,7 @@ fn maybe_enable_legacy_codex_auth_for_auto(has_other_provider: bool) -> Result<b
             "OpenAI/Codex",
             "Codex",
             &path,
-            "jcode login --provider openai",
+            "pryx login --provider openai",
         ));
         return Ok(false);
     }
@@ -927,7 +927,7 @@ fn ensure_claude_auth_allowed_for_explicit_choice() -> Result<()> {
     if maybe_prompt_for_generic_oauth_source(
         "Claude",
         auth::external::preferred_unconsented_anthropic_oauth_source(),
-        "jcode login --provider claude",
+        "pryx login --provider claude",
         false,
         || auth::claude::load_credentials().is_ok(),
     )? {
@@ -943,7 +943,7 @@ fn ensure_claude_auth_allowed_for_explicit_choice() -> Result<()> {
             "Claude",
             source.display_name(),
             &path,
-            "jcode login --provider claude"
+            "pryx login --provider claude"
         ));
     }
     if prompt_to_trust_external_auth("Claude", source.display_name(), &path)? {
@@ -951,7 +951,7 @@ fn ensure_claude_auth_allowed_for_explicit_choice() -> Result<()> {
         return Ok(());
     }
     anyhow::bail!(
-        "Skipped trusting external Claude credentials. Run `jcode login --provider claude` to authenticate jcode directly."
+        "Skipped trusting external Claude credentials. Run `pryx login --provider claude` to authenticate pryx directly."
     )
 }
 
@@ -967,7 +967,7 @@ fn maybe_enable_claude_auth_for_auto(has_other_provider: bool) -> Result<bool> {
         return maybe_prompt_for_generic_oauth_source(
             "Claude",
             Some(source),
-            "jcode login --provider claude",
+            "pryx login --provider claude",
             true,
             || auth::claude::load_credentials().is_ok(),
         );
@@ -985,7 +985,7 @@ fn maybe_enable_claude_auth_for_auto(has_other_provider: bool) -> Result<bool> {
             "Claude",
             source.display_name(),
             &path,
-            "jcode login --provider claude",
+            "pryx login --provider claude",
         ));
         return Ok(false);
     }
@@ -1010,7 +1010,7 @@ fn ensure_gemini_auth_allowed_for_explicit_choice() -> Result<()> {
     if maybe_prompt_for_generic_oauth_source(
         "Gemini",
         auth::external::preferred_unconsented_gemini_oauth_source(),
-        "jcode login --provider gemini",
+        "pryx login --provider gemini",
         false,
         || auth::gemini::load_tokens().is_ok(),
     )? {
@@ -1026,7 +1026,7 @@ fn ensure_gemini_auth_allowed_for_explicit_choice() -> Result<()> {
             "Gemini",
             "Gemini CLI",
             &path,
-            "jcode login --provider gemini"
+            "pryx login --provider gemini"
         ));
     }
     if prompt_to_trust_external_auth("Gemini", "Gemini CLI", &path)? {
@@ -1034,7 +1034,7 @@ fn ensure_gemini_auth_allowed_for_explicit_choice() -> Result<()> {
         return Ok(());
     }
     anyhow::bail!(
-        "Skipped trusting Gemini CLI credentials. Run `jcode login --provider gemini` to authenticate jcode directly."
+        "Skipped trusting Gemini CLI credentials. Run `pryx login --provider gemini` to authenticate pryx directly."
     )
 }
 
@@ -1054,7 +1054,7 @@ fn maybe_enable_gemini_auth_for_auto(has_other_provider: bool) -> Result<bool> {
         return maybe_prompt_for_generic_oauth_source(
             "Gemini",
             Some(source),
-            "jcode login --provider gemini",
+            "pryx login --provider gemini",
             true,
             || auth::gemini::load_tokens().is_ok(),
         );
@@ -1072,7 +1072,7 @@ fn maybe_enable_gemini_auth_for_auto(has_other_provider: bool) -> Result<bool> {
             "Gemini",
             "Gemini CLI",
             &path,
-            "jcode login --provider gemini",
+            "pryx login --provider gemini",
         ));
         return Ok(false);
     }
@@ -1091,7 +1091,7 @@ fn ensure_antigravity_auth_allowed_for_explicit_choice() -> Result<()> {
     if maybe_prompt_for_generic_oauth_source(
         "Antigravity",
         auth::external::preferred_unconsented_antigravity_oauth_source(),
-        "jcode login --provider antigravity",
+        "pryx login --provider antigravity",
         false,
         || auth::antigravity::load_tokens().is_ok(),
     )? {
@@ -1114,7 +1114,7 @@ fn ensure_copilot_auth_allowed_for_explicit_choice() -> Result<()> {
             "GitHub Copilot",
             source.display_name(),
             &path,
-            "jcode login --provider copilot"
+            "pryx login --provider copilot"
         ));
     }
     if prompt_to_trust_external_auth("GitHub Copilot", source.display_name(), &path)? {
@@ -1122,7 +1122,7 @@ fn ensure_copilot_auth_allowed_for_explicit_choice() -> Result<()> {
         return Ok(());
     }
     anyhow::bail!(
-        "Skipped trusting external Copilot credentials. Run `jcode login --provider copilot` to authenticate jcode directly."
+        "Skipped trusting external Copilot credentials. Run `pryx login --provider copilot` to authenticate pryx directly."
     )
 }
 
@@ -1142,7 +1142,7 @@ fn maybe_enable_copilot_auth_for_auto(has_other_provider: bool) -> Result<bool> 
             "GitHub Copilot",
             source.display_name(),
             &path,
-            "jcode login --provider copilot",
+            "pryx login --provider copilot",
         ));
         return Ok(false);
     }
@@ -1166,7 +1166,7 @@ fn ensure_cursor_auth_allowed_for_explicit_choice() -> Result<()> {
             "Cursor",
             source.display_name(),
             &path,
-            "jcode login --provider cursor"
+            "pryx login --provider cursor"
         ));
     }
     if prompt_to_trust_external_auth("Cursor", source.display_name(), &path)? {
@@ -1174,7 +1174,7 @@ fn ensure_cursor_auth_allowed_for_explicit_choice() -> Result<()> {
         return Ok(());
     }
     anyhow::bail!(
-        "Skipped trusting external Cursor credentials. Run `jcode login --provider cursor` to authenticate jcode directly."
+        "Skipped trusting external Cursor credentials. Run `pryx login --provider cursor` to authenticate pryx directly."
     )
 }
 
@@ -1194,7 +1194,7 @@ fn maybe_enable_cursor_auth_for_auto(has_other_provider: bool) -> Result<bool> {
             "Cursor",
             source.display_name(),
             &path,
-            "jcode login --provider cursor",
+            "pryx login --provider cursor",
         ));
         return Ok(false);
     }
@@ -1231,10 +1231,10 @@ fn disable_subscription_runtime_mode() {
 }
 
 fn disable_subscription_runtime_mode_preserving_active_provider_profile() {
-    if std::env::var_os("JCODE_PROVIDER_PROFILE_ACTIVE").is_some()
-        || std::env::var_os("JCODE_NAMED_PROVIDER_PROFILE").is_some()
+    if std::env::var_os("PRYX_PROVIDER_PROFILE_ACTIVE").is_some()
+        || std::env::var_os("PRYX_NAMED_PROVIDER_PROFILE").is_some()
     {
-        crate::env::remove_var(crate::subscription_catalog::JCODE_SUBSCRIPTION_ACTIVE_ENV);
+        crate::env::remove_var(crate::subscription_catalog::PRYX_SUBSCRIPTION_ACTIVE_ENV);
     } else {
         disable_subscription_runtime_mode();
     }
@@ -1243,7 +1243,7 @@ fn disable_subscription_runtime_mode_preserving_active_provider_profile() {
 pub fn apply_login_provider_profile_env(provider: LoginProviderDescriptor) {
     // #712: the arms below clear an explicitly selected named profile, which
     // made auth-test probe (and false-negative) the generic compatible slot.
-    if std::env::var_os("JCODE_NAMED_PROVIDER_PROFILE").is_some() {
+    if std::env::var_os("PRYX_NAMED_PROVIDER_PROFILE").is_some() {
         return;
     }
     match provider.target {
@@ -1252,7 +1252,7 @@ pub fn apply_login_provider_profile_env(provider: LoginProviderDescriptor) {
             // Bootstrap login still spawns the daemon with `--provider auto`. Mark the
             // just-selected compatible provider as active so the child process does
             // not clear these inherited runtime vars before credential detection.
-            crate::env::set_var("JCODE_PROVIDER_PROFILE_ACTIVE", "1");
+            crate::env::set_var("PRYX_PROVIDER_PROFILE_ACTIVE", "1");
         }
         LoginProviderTarget::AutoImport | LoginProviderTarget::Google => {}
         _ => {
@@ -1284,7 +1284,7 @@ pub async fn login_and_bootstrap_provider(
             disable_subscription_runtime_mode();
             Arc::new(provider::MultiProvider::new())
         }
-        LoginProviderTarget::Jcode => Arc::new(provider::jcode::JcodeProvider::new()),
+        LoginProviderTarget::Pryx => Arc::new(provider::pryx::PryxProvider::new()),
         LoginProviderTarget::Claude | LoginProviderTarget::ClaudeApiKey => {
             disable_subscription_runtime_mode();
             Arc::new(provider::MultiProvider::new())
@@ -1339,8 +1339,8 @@ pub async fn login_and_bootstrap_provider(
         LoginProviderTarget::Cursor => {
             disable_subscription_runtime_mode();
             clear_initial_model_provider();
-            crate::env::set_var("JCODE_ACTIVE_PROVIDER", "cursor");
-            Arc::new(jcode_provider_cursor_runtime::CursorCliProvider::new())
+            crate::env::set_var("PRYX_ACTIVE_PROVIDER", "cursor");
+            Arc::new(pryx_provider_cursor_runtime::CursorCliProvider::new())
         }
         LoginProviderTarget::Copilot => {
             disable_subscription_runtime_mode();
@@ -1349,14 +1349,14 @@ pub async fn login_and_bootstrap_provider(
         LoginProviderTarget::Gemini => {
             disable_subscription_runtime_mode();
             clear_initial_model_provider();
-            crate::env::set_var("JCODE_ACTIVE_PROVIDER", "gemini");
-            Arc::new(jcode_provider_gemini_runtime::GeminiProvider::new())
+            crate::env::set_var("PRYX_ACTIVE_PROVIDER", "gemini");
+            Arc::new(pryx_provider_gemini_runtime::GeminiProvider::new())
         }
         LoginProviderTarget::Antigravity => {
             disable_subscription_runtime_mode();
             clear_initial_model_provider();
-            crate::env::set_var("JCODE_ACTIVE_PROVIDER", "antigravity");
-            Arc::new(jcode_provider_antigravity_runtime::AntigravityProvider::new())
+            crate::env::set_var("PRYX_ACTIVE_PROVIDER", "antigravity");
+            Arc::new(pryx_provider_antigravity_runtime::AntigravityProvider::new())
         }
         LoginProviderTarget::Google => {
             anyhow::bail!("Google login cannot be used as a model provider bootstrap");
@@ -1419,15 +1419,15 @@ async fn init_provider_with_options(
     // OpenRouter/OpenAI-compatible factory) and their model-picker routes.
     super::startup::register_external_provider_runtimes();
 
-    if let Ok(profile_name) = std::env::var("JCODE_PROVIDER_PROFILE_NAME")
+    if let Ok(profile_name) = std::env::var("PRYX_PROVIDER_PROFILE_NAME")
         && !profile_name.trim().is_empty()
     {
         crate::provider_catalog::apply_named_provider_profile_env(profile_name.trim())?;
-        crate::env::set_var("JCODE_PROVIDER_PROFILE_ACTIVE", "1");
+        crate::env::set_var("PRYX_PROVIDER_PROFILE_ACTIVE", "1");
     }
 
-    if std::env::var_os("JCODE_PROVIDER_PROFILE_ACTIVE").is_none()
-        && std::env::var_os("JCODE_NAMED_PROVIDER_PROFILE").is_none()
+    if std::env::var_os("PRYX_PROVIDER_PROFILE_ACTIVE").is_none()
+        && std::env::var_os("PRYX_NAMED_PROVIDER_PROFILE").is_none()
     {
         if let Some(profile) = profile_for_choice(choice) {
             apply_openai_compatible_profile_env(Some(profile));
@@ -1443,9 +1443,9 @@ async fn init_provider_with_options(
     };
 
     let provider: Arc<dyn provider::Provider> = match choice {
-        ProviderChoice::Jcode => {
-            init_notice("Using Jcode subscription provider");
-            Arc::new(provider::jcode::JcodeProvider::new())
+        ProviderChoice::Pryx => {
+            init_notice("Using Pryx subscription provider");
+            Arc::new(provider::pryx::PryxProvider::new())
         }
         ProviderChoice::Claude => {
             disable_subscription_runtime_mode();
@@ -1467,7 +1467,7 @@ async fn init_provider_with_options(
             crate::logging::warn(
                 "Using --provider claude-subprocess is deprecated and will be removed. Prefer `--provider claude`.",
             );
-            crate::env::set_var("JCODE_USE_CLAUDE_CLI", "1");
+            crate::env::set_var("PRYX_USE_CLAUDE_CLI", "1");
             init_notice(
                 "Using deprecated Claude subprocess transport as the initial provider (legacy compatibility mode)",
             );
@@ -1493,8 +1493,8 @@ async fn init_provider_with_options(
             ensure_cursor_auth_allowed_for_explicit_choice()?;
             init_notice("Using Cursor native HTTPS provider (experimental)");
             clear_initial_model_provider();
-            crate::env::set_var("JCODE_ACTIVE_PROVIDER", "cursor");
-            Arc::new(jcode_provider_cursor_runtime::CursorCliProvider::new())
+            crate::env::set_var("PRYX_ACTIVE_PROVIDER", "cursor");
+            Arc::new(pryx_provider_cursor_runtime::CursorCliProvider::new())
         }
         ProviderChoice::Copilot => {
             disable_subscription_runtime_mode();
@@ -1514,14 +1514,14 @@ async fn init_provider_with_options(
                 init_notice("Using Gemini provider (native Google Code Assist OAuth)");
             }
             clear_initial_model_provider();
-            crate::env::set_var("JCODE_ACTIVE_PROVIDER", "gemini");
-            Arc::new(jcode_provider_gemini_runtime::GeminiProvider::new())
+            crate::env::set_var("PRYX_ACTIVE_PROVIDER", "gemini");
+            Arc::new(pryx_provider_gemini_runtime::GeminiProvider::new())
         }
         ProviderChoice::GrokBuild => {
             disable_subscription_runtime_mode();
             init_notice("Using Grok Build subscription via the authenticated Grok CLI");
             clear_initial_model_provider();
-            crate::env::set_var("JCODE_ACTIVE_PROVIDER", "grok-build");
+            crate::env::set_var("PRYX_ACTIVE_PROVIDER", "grok-build");
             crate::provider::external::instantiate_external_provider(
                 crate::provider::external::GROK_BUILD_RUNTIME,
             )
@@ -1588,7 +1588,7 @@ async fn init_provider_with_options(
             disable_subscription_runtime_mode();
             let profile = profile_for_choice(choice)
                 .ok_or_else(|| anyhow::anyhow!("missing provider profile for choice"))?;
-            if std::env::var_os("JCODE_NAMED_PROVIDER_PROFILE").is_none() {
+            if std::env::var_os("PRYX_NAMED_PROVIDER_PROFILE").is_none() {
                 // An explicit `--provider <compatible>` selection should win over
                 // any stale active-profile marker inherited from a previous
                 // bootstrap/login flow. Named provider profiles still take
@@ -1596,7 +1596,7 @@ async fn init_provider_with_options(
                 force_apply_openai_compatible_profile_env(Some(profile));
             }
             let mut runtime_model_hint = None;
-            let display_name = if let Ok(named) = std::env::var("JCODE_NAMED_PROVIDER_PROFILE") {
+            let display_name = if let Ok(named) = std::env::var("PRYX_NAMED_PROVIDER_PROFILE") {
                 if let Some(profile) = crate::config::config().providers.get(&named) {
                     runtime_model_hint = profile.default_model.clone();
                 }
@@ -1616,20 +1616,20 @@ async fn init_provider_with_options(
                 display_name
             ));
             crate::provider::activation::apply_openai_compatible_runtime(runtime_model_hint)?;
-            if std::env::var_os("JCODE_NAMED_PROVIDER_PROFILE").is_some() {
-                let profile_name = std::env::var("JCODE_NAMED_PROVIDER_PROFILE")?;
+            if std::env::var_os("PRYX_NAMED_PROVIDER_PROFILE").is_some() {
+                let profile_name = std::env::var("PRYX_NAMED_PROVIDER_PROFILE")?;
                 let cfg = crate::config::config();
                 let profile = cfg.providers.get(&profile_name).ok_or_else(|| {
                     anyhow::anyhow!("Unknown provider profile '{}'", profile_name)
                 })?;
                 Arc::new(
-                    jcode_provider_openrouter_runtime::OpenRouterProvider::new_named_openai_compatible(
+                    pryx_provider_openrouter_runtime::OpenRouterProvider::new_named_openai_compatible(
                         &profile_name,
                         profile,
                     )?,
                 )
             } else {
-                Arc::new(jcode_provider_openrouter_runtime::OpenRouterProvider::new()?)
+                Arc::new(pryx_provider_openrouter_runtime::OpenRouterProvider::new()?)
             }
         }
         ProviderChoice::Antigravity => {
@@ -1637,8 +1637,8 @@ async fn init_provider_with_options(
             ensure_antigravity_auth_allowed_for_explicit_choice()?;
             init_notice("Using Antigravity provider (experimental)");
             clear_initial_model_provider();
-            crate::env::set_var("JCODE_ACTIVE_PROVIDER", "antigravity");
-            Arc::new(jcode_provider_antigravity_runtime::AntigravityProvider::new())
+            crate::env::set_var("PRYX_ACTIVE_PROVIDER", "antigravity");
+            Arc::new(pryx_provider_antigravity_runtime::AntigravityProvider::new())
         }
         ProviderChoice::Google => {
             disable_subscription_runtime_mode();
@@ -1646,7 +1646,7 @@ async fn init_provider_with_options(
                 "Note: Google/Gmail is not a model provider. Using auto-detect for model provider.",
             );
             init_notice(
-                "Gmail credentials can be configured with `jcode login google`; the gmail tool is enabled by default in the full tool profile.",
+                "Gmail credentials can be configured with `pryx login google`; the gmail tool is enabled by default in the full tool profile.",
             );
             clear_initial_model_provider();
             Arc::new(provider::MultiProvider::new_fast())
@@ -1785,29 +1785,29 @@ async fn init_provider_with_options(
                     "Using {} (use /model to switch models)",
                     multi.name()
                 ));
-                crate::env::set_var("JCODE_ACTIVE_PROVIDER", multi.name().to_lowercase());
+                crate::env::set_var("PRYX_ACTIVE_PROVIDER", multi.name().to_lowercase());
                 Arc::new(multi)
             } else {
-                let non_interactive = std::env::var("JCODE_NON_INTERACTIVE").is_ok();
+                let non_interactive = std::env::var("PRYX_NON_INTERACTIVE").is_ok();
                 // Deferred-auth bootstrap: the interactive TUI server is spawned
-                // headless (JCODE_NON_INTERACTIVE) but the user logs in *inside*
+                // headless (PRYX_NON_INTERACTIVE) but the user logs in *inside*
                 // the TUI on a fresh install. Rather than bail, boot an empty
                 // MultiProvider with no configured credentials yet. The TUI's
                 // `/login` flow then activates a provider via the normal
                 // auth-changed path (MultiProvider::on_auth_changed hot-inits the
                 // newly logged-in provider). Only the actual TUI server opts in
-                // via JCODE_DEFERRED_AUTH_BOOTSTRAP, so `jcode run` and other
+                // via PRYX_DEFERRED_AUTH_BOOTSTRAP, so `pryx run` and other
                 // genuinely headless callers still fail loudly.
-                if std::env::var_os("JCODE_DEFERRED_AUTH_BOOTSTRAP").is_some() {
+                if std::env::var_os("PRYX_DEFERRED_AUTH_BOOTSTRAP").is_some() {
                     crate::logging::info(
                         "No credentials configured; booting deferred-auth MultiProvider for in-TUI onboarding login",
                     );
                     let multi = provider::MultiProvider::from_auth_status(availability.auth_status);
-                    crate::env::set_var("JCODE_ACTIVE_PROVIDER", multi.name().to_lowercase());
+                    crate::env::set_var("PRYX_ACTIVE_PROVIDER", multi.name().to_lowercase());
                     Arc::new(multi)
                 } else if non_interactive {
                     anyhow::bail!(
-                        "No credentials configured. Run 'jcode login' or set ANTHROPIC_API_KEY to authenticate."
+                        "No credentials configured. Run 'pryx login' or set ANTHROPIC_API_KEY to authenticate."
                     );
                 } else if !allow_login_bootstrap {
                     anyhow::bail!(
@@ -1833,8 +1833,8 @@ async fn init_provider_with_options(
         })?;
     }
 
-    if std::env::var_os("JCODE_PROVIDER_PROFILE_ACTIVE").is_none()
-        && std::env::var_os("JCODE_NAMED_PROVIDER_PROFILE").is_none()
+    if std::env::var_os("PRYX_PROVIDER_PROFILE_ACTIVE").is_none()
+        && std::env::var_os("PRYX_NAMED_PROVIDER_PROFILE").is_none()
         && model.is_none()
         && let Some(profile) = profile_for_choice(choice)
         && let Some(default_model) = resolved_profile_default_model(profile)

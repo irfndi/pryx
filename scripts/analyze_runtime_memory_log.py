@@ -119,12 +119,12 @@ class AttributionDelta:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Analyze jcode runtime memory JSONL logs for growth, spikes, attribution, and optimization hints"
+        description="Analyze pryx runtime memory JSONL logs for growth, spikes, attribution, and optimization hints"
     )
     parser.add_argument("paths", nargs="*", help="Specific JSONL files or directories to analyze")
     parser.add_argument(
         "--log-dir",
-        help="Directory containing runtime memory JSONL logs (default: ~/.jcode/logs/memory or $JCODE_HOME/logs/memory)",
+        help="Directory containing runtime memory JSONL logs (default: ~/.pryx/logs/memory or $PRYX_HOME/logs/memory)",
     )
     parser.add_argument("--days", type=int, default=None, help="Only include files from the last N daily logs")
     parser.add_argument("--top", type=int, default=DEFAULT_TOP_N, help="How many spikes/sessions/deltas to show")
@@ -154,10 +154,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def default_log_dir() -> Path:
-    jcode_home = os.environ.get("JCODE_HOME")
-    if jcode_home:
-        return Path(jcode_home).expanduser() / "logs" / "memory"
-    return Path.home() / ".jcode" / "logs" / "memory"
+    pryx_home = os.environ.get("PRYX_HOME")
+    if pryx_home:
+        return Path(pryx_home).expanduser() / "logs" / "memory"
+    return Path.home() / ".pryx" / "logs" / "memory"
 
 
 def resolve_paths(args: argparse.Namespace) -> list[Path]:
@@ -704,7 +704,7 @@ def build_incident_assessment(
                 "priority": 1,
                 "action": "Pause or cap the workload creating headless sessions.",
                 "why": "These are live allocations; allocator purge is not the first response.",
-                "commands": ["jcode debug 'server:memory-incident'", "jcode debug 'swarm:list'"],
+                "commands": ["pryx debug 'server:memory-incident'", "pryx debug 'swarm:list'"],
             },
             {
                 "priority": 2,
@@ -719,7 +719,7 @@ def build_incident_assessment(
             {
                 "priority": 4,
                 "action": "Purge only after session cleanup if freed-but-held memory remains high.",
-                "commands": ["jcode debug 'allocator:purge'"],
+                "commands": ["pryx debug 'allocator:purge'"],
             },
         ]
     elif retention_dominates:
@@ -734,12 +734,12 @@ def build_incident_assessment(
             {
                 "priority": 1,
                 "action": "Capture a before/after allocator purge and compare PSS.",
-                "commands": ["jcode debug 'allocator:purge'", "jcode debug 'server:memory-incident'"],
+                "commands": ["pryx debug 'allocator:purge'", "pryx debug 'server:memory-incident'"],
             },
             {
                 "priority": 2,
                 "action": "If retained pages repeatedly regrow, inspect allocation churn and allocator decay.",
-                "commands": ["jcode debug 'allocator'", "jcode debug 'allocator:decay:1000'"],
+                "commands": ["pryx debug 'allocator'", "pryx debug 'allocator:decay:1000'"],
             },
         ]
     elif attributed_state_dominates:
@@ -756,7 +756,7 @@ def build_incident_assessment(
             {
                 "priority": 1,
                 "action": "Start with the heaviest sessions and dominant payload category in this report.",
-                "commands": ["jcode debug 'server:memory'"],
+                "commands": ["pryx debug 'server:memory'"],
             }
         ]
     elif allocator_live >= 1024 * 1024 * 1024:
@@ -774,14 +774,14 @@ def build_incident_assessment(
             {
                 "priority": 1,
                 "action": "Capture full server attribution and add counters for the missing owner.",
-                "commands": ["jcode debug 'server:memory'"],
+                "commands": ["pryx debug 'server:memory'"],
             },
             {
                 "priority": 2,
                 "action": "Use a jemalloc-prof build and heap dump if coverage remains below 50%.",
                 "commands": [
-                    "jcode debug 'allocator:profile:on'",
-                    "jcode debug 'allocator:profile:dump /tmp/jcode-server.heap'",
+                    "pryx debug 'allocator:profile:on'",
+                    "pryx debug 'allocator:profile:dump /tmp/pryx-server.heap'",
                 ],
             },
         ]

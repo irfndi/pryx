@@ -11,22 +11,22 @@ import tempfile
 import time
 from pathlib import Path
 
-sys.path.insert(0, "/home/jeremy/jcode/scripts")
+sys.path.insert(0, "/home/jeremy/pryx/scripts")
 import repro_input_flicker as R  # noqa: E402
 
 
 def main() -> int:
-    root = Path(tempfile.mkdtemp(prefix="jcode-echo-"))
+    root = Path(tempfile.mkdtemp(prefix="pryx-echo-"))
     run = root / "run"
     run.mkdir(parents=True)
     env = os.environ.copy()
-    env["JCODE_SOCKET"] = "/run/user/1000/jcode.sock"
-    env["JCODE_DEBUG_CONTROL"] = "1"
-    dbg = Path("/run/user/1000/jcode-debug.sock")
+    env["PRYX_SOCKET"] = "/run/user/1000/pryx.sock"
+    env["PRYX_DEBUG_CONTROL"] = "1"
+    dbg = Path("/run/user/1000/pryx-debug.sock")
     cmd_p, resp_p = run / "cmd", run / "resp"
 
-    binary = sys.argv[1] if len(sys.argv) > 1 else "./target/selfdev/jcode"
-    sid = R.create_session(dbg, Path("/home/jeremy/jcode"))
+    binary = sys.argv[1] if len(sys.argv) > 1 else "./target/selfdev/pryx"
+    sid = R.create_session(dbg, Path("/home/jeremy/pryx"))
     client = R.launch_client(binary, env, sid, cmd_p, resp_p)
     try:
         R.settle(cmd_p, resp_p)

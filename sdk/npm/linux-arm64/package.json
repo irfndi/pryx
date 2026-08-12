@@ -1,7 +1,7 @@
 {
-  "name": "@1jehuang/jcode-linux-arm64",
+  "name": "@1jehuang/pryx-linux-arm64",
   "version": "1.2.0",
-  "description": "Jcode runtime binary for linux arm64",
+  "description": "Pryx runtime binary for linux arm64",
   "license": "MIT",
   "os": [
     "linux"
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/1jehuang/jcode.git",
+    "url": "git+https://github.com/pryx-co/pryx.git",
     "directory": "sdk/npm/linux-arm64"
   },
   "publishConfig": {

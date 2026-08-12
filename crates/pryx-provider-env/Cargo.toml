@@ -1,0 +1,18 @@
+[package]
+name = "pryx-provider-env"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "pryx_provider_env"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = "1"
+pryx-core = { path = "../pryx-core" }
+pryx-logging = { path = "../pryx-logging" }
+pryx-provider-metadata = { path = "../pryx-provider-metadata" }
+pryx-storage = { path = "../pryx-storage" }
+
+[dev-dependencies]
+tempfile = "3"

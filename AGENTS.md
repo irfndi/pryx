@@ -9,21 +9,21 @@
   or other agents yourself; tell the user and let them decide how to proceed.
 
 ## Install Notes
-- `~/.local/bin/jcode` is the launcher symlink used from `PATH`.
-- `~/.jcode/builds/current/jcode` is the active local/source-build channel; self-dev builds and `scripts/install_release.sh` point the launcher here.
-- `~/.jcode/builds/stable/jcode` is the stable release channel; `scripts/install.sh` installs this and points the launcher here.
-- `~/.jcode/builds/versions/<version>/jcode` stores immutable binaries.
-- `~/.jcode/builds/canary/jcode` still exists for canary/testing flows, but it is not the primary self-dev install path.
-- On Windows, the equivalents are `%LOCALAPPDATA%\\jcode\\bin\\jcode.exe` for the launcher, `%LOCALAPPDATA%\\jcode\\builds\\stable\\jcode.exe` for stable, and `%LOCALAPPDATA%\\jcode\\builds\\versions\\<version>\\jcode.exe` for immutable installs; `scripts/install.ps1` currently installs the stable channel.
+- `~/.local/bin/pryx` is the launcher symlink used from `PATH`.
+- `~/.pryx/builds/current/pryx` is the active local/source-build channel; self-dev builds and `scripts/install_release.sh` point the launcher here.
+- `~/.pryx/builds/stable/pryx` is the stable release channel; `scripts/install.sh` installs this and points the launcher here.
+- `~/.pryx/builds/versions/<version>/pryx` stores immutable binaries.
+- `~/.pryx/builds/canary/pryx` still exists for canary/testing flows, but it is not the primary self-dev install path.
+- On Windows, the equivalents are `%LOCALAPPDATA%\\pryx\\bin\\pryx.exe` for the launcher, `%LOCALAPPDATA%\\pryx\\builds\\stable\\pryx.exe` for stable, and `%LOCALAPPDATA%\\pryx\\builds\\versions\\<version>\\pryx.exe` for immutable installs; `scripts/install.ps1` currently installs the stable channel.
 - Ensure `~/.local/bin` is **before** `~/.cargo/bin` in `PATH`.
 
 ## Verifying a change at runtime
 
-`cargo build` alone proves nothing about behavior. `jcode run` and interactive
+`cargo build` alone proves nothing about behavior. `pryx run` and interactive
 sessions are served by the long-lived daemon at
-`~/.jcode/builds/shared-server/jcode`, which is a symlink into
-`~/.jcode/builds/versions/<version>/`. Until that symlink is repointed and the
-daemon restarted (`jcode self-dev --build`), a freshly built binary is inert and
+`~/.pryx/builds/shared-server/pryx`, which is a symlink into
+`~/.pryx/builds/versions/<version>/`. Until that symlink is repointed and the
+daemon restarted (`pryx self-dev --build`), a freshly built binary is inert and
 every runtime check silently measures the old code.
 
 To test a change without disturbing the shared daemon or the caller's session,
@@ -31,7 +31,7 @@ run your build against its own socket:
 
 ```bash
 cargo build --profile selfdev
-./target/selfdev/jcode run --no-update --socket /run/user/1000/jcode-mytest.sock '<prompt>'
+./target/selfdev/pryx run --no-update --socket /run/user/1000/pryx-mytest.sock '<prompt>'
 ```
 
 Two things that waste time otherwise:
@@ -40,5 +40,5 @@ Two things that waste time otherwise:
   code path with it produces no visible output under `--trace`. Use `eprintln!`
   for throwaway diagnostics and delete it before committing.
 - Confirm which binary you are actually inspecting. `strings` on
-  `builds/shared-server/jcode` reads a 70-byte symlink, not a program; resolve it
+  `builds/shared-server/pryx` reads a 70-byte symlink, not a program; resolve it
   with `readlink -f` first.

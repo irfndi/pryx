@@ -1,10 +1,10 @@
-import { JcodeClient } from "@1jehuang/jcode-sdk";
+import { PryxClient } from "@1jehuang/pryx-sdk";
 
 const prompt = process.argv.slice(2).join(" ") || "Describe this directory in one sentence.";
 
-const client = await JcodeClient.launch({
+const client = await PryxClient.launch({
   workingDir: process.cwd(),
-  binary: process.env.JCODE_BINARY,
+  binary: process.env.PRYX_BINARY,
 });
 
 try {
